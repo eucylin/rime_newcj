@@ -1,0 +1,132 @@
+# Rime schema settings
+# encoding: utf-8
+# 自由大新倉頡
+
+schema:
+  schema_id: newcj
+  name: 自由大新
+  version: "0.32"
+  author:
+    - 大新倉頡共同編輯計畫
+  description: |
+    大新倉頡 RIME 輸入方案
+  dependencies:
+    - terra_pinyin
+    - bopomofo_tw
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中文, 西文 ]
+  - name: full_shape
+    states: [ 半角, 全角 ]
+  - name: simplification
+    states: [ 漢字, 汉字 ]
+  - name: extended_charset
+    states: [ 常用, 增廣 ]
+  - name: ascii_punct
+    states: [ 。，, ．， ]
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - affix_segmentor@zhuyin
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    # - reverse_lookup_translator
+    - table_translator
+    - script_translator@zhuyin
+  filters:
+    - simplifier
+    - uniquifier
+    - single_char_filter
+    - reverse_lookup_filter@reverse_lookup_newcj
+    - reverse_lookup_filter@phonetic_reverse_lookup
+
+speller:
+  alphabet: zyxwvutsrqponmlkjihgfedcba,./;?[]
+  delimiter: " "
+  auto_select: true
+  max_code_length: 6  # 取消五碼頂字上屏
+
+translator:
+  dictionary: newcj
+  enable_charset_filter: true
+  enable_sentence: false #碼表輸入法連打 註：這個選項僅針對 table_translator，用於屏蔽倉頡、五筆中帶有太極圖章「☯」的連打詞句選項，不可作用於拼音、注音、速成等輸入方案。
+  # enable_encoder: true # 是否開啓自動造詞〔僅table_translator有效〕
+  enable_user_dict: false # 禁止用戶字典防止詞頻變化
+  encode_commit_history: true
+  max_phrase_length: 5
+  preedit_format:
+    - "xlit|',./;?[]abcdefghijklmnopqrstuvwxyz|、，。／；？「」日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜言|"
+  comment_format:
+    - "xlit|',./;?[]abcdefghijklmnopqrstuvwxyz|、，。／；？「」日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜言|"
+  # disable_user_dict_for_patterns:
+  #   - "^z.*$"
+  #   - "^yyy.*$"
+
+abc_segmentor:
+ extra_tags:
+   - reverse_lookup_newcj
+
+reverse_lookup_newcj:
+ dictionary: newcj
+ preedit_format: []
+ comment_format:
+   - "xlit|abcdefghijklmnopqrstuvwxyz|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜言|"
+
+zhuyin:
+  tag: zhuyin
+  prefix: "`"
+  dictionary: terra_pinyin
+  prism: bopomofo_tw
+  preedit_format:	#menu反查之輸入法 顯示
+    - "xlit|1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/- 6347'|ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˉˊˇˋ˙ |"
+    - xform/^/《注音反查》/
+  comment_format:	#menu 提示 字碼 顯示
+    - "xlit|abcdefghijklmnopqrstuvwxyz|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜言|"
+  tips: 【注音反查】
+
+zhuyin_reverse_lookup:
+  tags: [ zhuyin ]
+  # dictionary: newcj
+  overwrite_comment: true  # 覆蓋其他提示
+  comment_format:
+    - "xlit|abcdefghijklmnopqrstuvwxyz|日月金木水火土竹戈十大中一弓人心手口尸廿山女田難卜言|"
+
+#simplifier:
+#  opencc_config: t2tw.json
+#  option_name: zh_tw
+
+simplifier:
+  tips: all  # 簡化字模式下提示對應的傳統漢字
+
+punctuator:
+  import_preset: symbols-newcj
+
+key_binder:
+  bindings:
+    __patch:
+      - key_bindings:/emacs_editing
+      - key_bindings:/move_by_word_with_tab
+      - key_bindings:/paging_with_minus_equal
+      - key_bindings:/numbered_mode_switch
+
+recognizer:
+  import_preset: default
+  patterns:
+    punct: '^/([0-9]0?|[A-Za-z]+)$'
+    zhuyin: "`[1qaz2wsxedcrfv5tgbyhnujm8ik,9ol.0p;/-6347]*'?$"
